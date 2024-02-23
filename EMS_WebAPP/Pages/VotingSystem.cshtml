@@ -1,0 +1,126 @@
+﻿@page
+@model EMS_WebAPP.Pages.VotingSystemModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting System</title>
+    <link href="~/css/common.css" rel="stylesheet" />
+    @Html.AntiForgeryToken()
+    <style>
+        .head-div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+    @if(Model.isVoted){
+        <h2>You already voted!</h2>
+    }
+    else{
+    <div>
+        <div class="head-div">
+            <h2>Voting System</h2>
+            <div>
+                <select id="stateCode">
+                    <option value="">Choose state</option>
+                    @foreach (var candidate in Model.States)
+                    {
+                        <option value="@candidate.stateCode">@candidate.stateName</option>
+                    }
+                </select>
+                <button type="button" onclick="StateFilter()">State Filter</button>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Candidate Id</th>
+                    <th>Candidate Name</th>
+                    <th>Party Name</th>
+                    <th>State Name</th>
+                    <th>Symbol</th>
+                    <th>Vote</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    }
+    
+</body>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    function StateFilter() {
+        var stateCode = $("#stateCode").val();
+        if (stateCode == '') {
+            alert("Select state"); 
+            return;
+        }
+        $.ajax({
+            type: 'GET',
+            url: "/VotingSystem?handler=VotingSystem",
+            success: function (data) {
+                if (data.status == "01") {
+                    var json = JSON.parse(data.message);
+                    console.log(json);
+                    var strBuild = '';
+                    for (var i = 0; i < json.length; i++) {
+                        var jsonData = json[i];
+                        if (jsonData['StateCode'] == stateCode) {
+                            strBuild += '<tr>';
+                            strBuild += '<td>' + jsonData["CandidateId"] + '</td>';
+                            strBuild += '<td>' + jsonData["CandidateName"] + '</td>';
+                            strBuild += '<td>' + jsonData["PartyName"] + '</td>';
+                            strBuild += '<td>' + jsonData["StateName"] + '</td>';
+                            strBuild += '<td>' + jsonData["Symbol"] + '</td>';
+                            strBuild += '<td><button onclick="Vote(' + jsonData["CandidateId"] + ')">Vote</button></td>';
+                            strBuild += '</tr>';
+                        }
+                    }
+                    $('tbody').html(strBuild != '' ? strBuild : "<h3>No candidates in this state</h3>");
+                }
+                else {
+                    alert('unable to get list now');
+                }
+            },
+            error: function (error) {
+                alert('Failed to get list. Please try again.');
+            }
+        });
+    }
+    function Vote(candidateId){
+        var param = {
+            candidateId: candidateId
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/VotingSystem?handler=Vote',
+            headers:
+            {
+                "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+            },
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                if (data.status == "01") {
+                    alert('Voted successfully!');
+                    location.reload();
+                }
+                else {
+                    alert('unable to add now');
+                }
+            },
+            error: function (error) {
+                alert('Failed to add. Please try again.');
+            }
+        });
+    }
+</script>
+</html>

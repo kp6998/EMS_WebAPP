@@ -1,0 +1,86 @@
+﻿@page
+@model EMS_WebAPP.Pages.VoterListModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter list</title>
+    <link href="~/css/common.css" rel="stylesheet" />
+    @Html.AntiForgeryToken()
+</head>
+<body>
+    <div>
+        <h2>Voter List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Voter ID</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Photo URL</th>
+                    <th>Status</th>
+                    <th>Approve</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var voter in Model.Voters)
+                {
+                    <tr>
+                        <td>@voter.voterId</td>
+                        <td>@voter.name</td>
+                        <td>@voter.address</td>
+                        <td>@voter.photoUrl</td>
+                        <td>
+                            @if (voter.isApproved)
+                            {
+                                <span id="approvalStatus-@voter.voterId">Approved</span>
+                            }
+                            else
+                            {
+                                <span id="approvalStatus-@voter.voterId">Pending</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!voter.isApproved && Model.isAdmin)
+                            {
+                                <button id="approveButton-@voter.voterId" onclick="approveVoter('@voter.voterId')">Approve</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        function approveVoter(voterId) {
+            $.ajax({
+                type: 'POST',
+                url: '/VoterList?handler=ApproveVoter',
+                headers:
+                {
+                    "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                data: JSON.stringify({ voterId: voterId }),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if(data.status == "01"){
+                        alert('Voter approved successfully!');
+                        $('#approvalStatus-' + voterId).text('Approved');
+                        $('#approveButton-' + voterId).hide();
+                    }
+                    else{
+                        alert('unable to approve now');
+                    }
+                },
+                error: function (error) {
+                    alert('Failed to approve voter. Please try again.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

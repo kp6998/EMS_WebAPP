@@ -1,0 +1,117 @@
+﻿@page
+@model EMS_WebAPP.Pages.CanditatesListModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canditates List</title>
+    <link href="~/css/common.css" rel="stylesheet" />
+    @Html.AntiForgeryToken()
+    <style>
+        .head-div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div>
+        <div class="head-div">
+            <h2>Canditates List</h2>
+            <button type="button" onclick="AddCanditate()">Add new canditate</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Candidate Id</th>
+                    <th>Candidate Name</th>
+                    <th>Party Code</th>
+                    <th>State Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var candidate in Model.Candidates)
+                {
+                    <tr>
+                        <td>@candidate.candidateId</td>
+                        <td>@candidate.candidateName</td>
+                        <td>@candidate.partyCode</td>
+                        <td>@candidate.stateCode</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div id="overlay" class="overlay"></div>
+    </div>
+    <div id="Popup" class="popup">
+        <h3>Add new candidate</h3>
+        <label for="candidateName">Candidate Name:</label>
+        <input type="text" id="candidateName" name="candidateName">
+        <br>
+        <label for="partyCode">Party Code:</label>
+        <input type="text" id="partyCode" name="partyCode">
+        <br>
+        <label for="stateCode">State Code:</label>
+        <input type="text" id="stateCode" name="stateCode">
+        <br>
+        <button onclick="Save()">Save</button>
+        <button onclick="closePopup()">Cancel</button>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    function openPopup() {
+        $("#Popup").css("display", "block");
+        $("#overlay").css("display", "block");
+    }
+
+    function closePopup() {
+        $("#Popup").css("display", "none");
+        $("#overlay").css("display", "none");
+    }
+
+    function AddCanditate() {
+        openPopup();
+    }
+
+    function Save() {
+        var candidateName = $('#candidateName').val();
+        var partyCode = $('#partyCode').val();
+        var stateCode = $('#stateCode').val();
+
+        var param = {
+            candidateId: 0,
+            candidateName: candidateName,
+            partyCode: partyCode,
+            stateCode: stateCode
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '/CanditatesList?handler=CanditateReg',
+            headers:
+            {
+                "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+            },
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                if (data.status == "01") {
+                    alert('Canditate added succesfully successfully!');
+                    location.reload();
+                }
+                else {
+                    alert('unable to add now');
+                }
+            },
+            error: function (error) {
+                alert('Failed to add. Please try again.');
+            }
+        });
+    }
+
+</script>
+</html>

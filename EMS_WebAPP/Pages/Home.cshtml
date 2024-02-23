@@ -1,0 +1,80 @@
+﻿@page
+@model EMS_WebAPP.Pages.HomeModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        div {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            max-width: 300px;
+            margin: auto;
+        }
+
+        a {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            text-decoration: none;
+            color: #007bff;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+            a:hover {
+                background-color: #007bff;
+                color: #fff;
+            }
+    </style>
+    <title>Navigation</title>
+</head>
+
+    <div>
+        @if (Model.isAdmin)
+        {
+            <a href="/StateList">State List</a>
+        <a href="/CanditatesList">CanditatesList List</a>
+            <a href="/PartiesList">Parties List</a>
+            <a href="/Result">Election Result</a>
+        }
+        <a href="/VoterList">Voter List</a>
+        <a href="/VotingSystem">Voting System</a>
+        <a onclick="Logout()">Logout</a>
+    </div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    function Logout() {
+        $.ajax({
+            type: 'GET',
+            url: "/Home?handler=Logout",
+            success: function (data) {
+                alert("Logged out successfully")
+                window.location.href = "/Login";
+            },
+            error: function (error) {
+                alert('Unable to logout. Please try again.');
+            }
+        });
+    }
+
+ </script>
+</html>
+

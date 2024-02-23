@@ -1,0 +1,50 @@
+﻿@page
+@model EMS_WebAPP.Pages.ResultModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party List</title>
+    <link href="~/css/common.css" rel="stylesheet" />
+    @Html.AntiForgeryToken()
+    <style>
+        .head-div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div>
+        <div class="head-div">
+            <h2>Result</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Party Code</th>
+                    <th>Party Name</th>
+                    <th>Number of Votes</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var voteCounts in Model.voteCounts)
+                {
+                    <tr>
+                        <td>@voteCounts.partyCode</td>
+                        <td>@voteCounts.partyName</td>
+                        <td>@voteCounts.numberOfVotes</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+
+</script>
+</html>

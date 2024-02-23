@@ -1,0 +1,145 @@
+﻿@page
+@model EMS_WebAPP.Pages.LoginModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    @Html.AntiForgeryToken()
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .login-box {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            max-width: 300px;
+            margin: 10px;
+        }
+
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+            input[type="button"] {
+                background-color: #007bff;
+                color: #fff;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+                input[type="button"]:hover {
+                    background-color: #0056b3;
+                }
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+            margin-top: 10px;
+            display: block;
+        }
+
+        h2 {
+            color: #333;
+        }
+    </style>
+    <title>Login Page</title>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h2>Election Commissioner Login</h2>
+            <input type="text" placeholder="Username" id="txtUsername" required />
+            <input type="text" placeholder="Password" id="txtPassword" required />
+            <input type="button" value="Login" onclick="AdminLogin()" />
+        </div>
+        <div class="login-box">
+            <h2>Voter Login</h2>
+            <input type="number" placeholder="Voter Id" id="txtVoterId" required/>
+            <input type="button" value="Login" onclick="VoterLogin()" />
+            <a href="/VoterReg">Register</a>
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    function VoterLogin(){
+        var param = {
+            voterId: $('#txtVoterId').val()
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/Login?handler=VoterLogin',
+            headers:
+            {
+                "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+            },
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                if (data.status == "01") {
+                    alert("Logged in successfully")
+                    window.location.href = "/Home";
+                }
+                else {
+                    alert('Wrong voter ID or not registered yet');
+                }
+            },
+            error: function (error) {
+                alert('Failed to login. Please try again.');
+            }
+        });
+    }
+    function AdminLogin(){
+        var param = {
+            username: $('#txtUsername').val(),
+            password: $('#txtPassword').val()
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/Login?handler=AdminLogin',
+            headers:
+            {
+                "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+            },
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                if (data.status == "01") {
+                    alert(data.message);
+                    window.location.href = "/Home";
+                }
+                else {
+                    alert(data.message);
+                }
+            },
+            error: function (error) {
+                alert('Failed to add. Please try again.');
+            }
+        });
+    }
+</script>
+</html>

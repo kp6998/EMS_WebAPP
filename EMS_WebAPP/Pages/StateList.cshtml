@@ -1,0 +1,103 @@
+﻿@page
+@model EMS_WebAPP.Pages.StateListModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>States</title>
+    <link href="~/css/common.css" rel="stylesheet" />
+    @Html.AntiForgeryToken()
+</head>
+<body>
+    <div>
+        <h2>States and Number of MP seats</h2>
+        <div>
+            <table id="mpSeatsTable">
+                <thead>
+                    <tr>
+                        <th>State Code</th>
+                        <th>State Name</th>
+                        <th>Number of MP Seats</th>
+                        <th>Edit Seats</th>
+                    </tr>
+                </thead>
+                <tbody id="mpSeatsTableBody">
+                    @foreach (var item in Model.States)
+                    {
+                        <tr>
+                            <td>@item.stateCode</td>
+                            <td>@item.stateName</td>
+                            <td class="mpSeatsCell-@item.stateCode">@item.numberOfMPSeats</td>
+                            <td>
+                                <button onclick="editSeats('@item.stateCode', '@item.stateName', @item.numberOfMPSeats)">Edit</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div id="overlay" class="overlay"></div>
+    </div>
+    <div id="Popup" class="popup">
+        <label for="editedSeats">Enter seats for <a id="stateName"></a>:</label>
+        <input type="hidden" id="stateCode" value="" />
+        <input type="number" id="editedSeats" name="editedSeats">
+        <button onclick="saveEditedSeats()">Save</button>
+        <button onclick="closePopup()">Cancel</button>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        function editSeats(stateCode, stateName, currentSeats) {
+            $("#stateCode").val(stateCode);
+            $("#stateName").html(stateName);
+            $("#editedSeats").val(currentSeats);
+            $("#Popup").css("display", "block");
+            $("#overlay").css("display", "block");
+        }
+
+        function saveEditedSeats() {
+            var txtStateCode = $("#stateCode").val();
+            var txtEditedSeats = $("#editedSeats").val();
+            var param = {
+                "stateCode": txtStateCode,
+                "numberOfMPSeats": txtEditedSeats,
+                "stateName": $("#stateName").text()
+            }
+            $.ajax({
+                type: 'POST',
+                url: "/StateList?handler=UpdateSeats",
+                headers:
+                {
+                    "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data.status == "01") {
+                        $(".mpSeatsCell-" + txtStateCode).text(txtEditedSeats);
+                        alert("Updated");
+                        closePopup();
+                    } else {
+                        alert("Unable to update now");
+                    }
+                },
+                failure: function (ex) {
+                    console.log(ex);
+                    alert("failure");
+                },
+                error: function (ex) {
+                    console.log(ex);
+                    alert("Unable to update now");
+                }
+            });
+        }
+
+        function closePopup() {
+            $("#Popup").css("display", "none");
+            $("#overlay").css("display", "none");
+        }
+    </script>
+</body>
+</html>

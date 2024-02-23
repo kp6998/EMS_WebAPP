@@ -1,0 +1,126 @@
+﻿@page
+@model EMS_WebAPP.Pages.VoterRegModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Reg</title>
+    @Html.AntiForgeryToken()
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        div {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            max-width: 300px;
+            margin: auto;
+        }
+
+        input, label {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+            input[type="button"] {
+                background-color: #007bff;
+                color: #fff;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+                input[type="button"]:hover {
+                    background-color: #0056b3;
+                }
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+            margin-top: 10px;
+            display: block;
+        }
+
+    </style>
+    <title>Voter Registration</title>
+</head>
+<body>
+    <div>
+        <input type="text" placeholder="Name" id="txtName" />
+        <input type="text" placeholder="Address" id="txtAddress" />
+        <input type="file" id="filePhoto" />
+        <input type="button" value="Register" onclick="VoterReg()" />
+        <a href="Login">Back to login</a>
+    </div>
+</body>
+<script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-storage.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    var firebaseConfig = {
+        storageBucket: "hello-world-c054a.appspot.com",
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    function VoterReg() {
+        var voterData = {
+            name: $('#txtName').val(),
+            address: $('#txtAddress').val()
+        };
+        var photoFile = $('#filePhoto')[0].files[0];
+        var storageRef = firebase.storage().ref('photos/' + photoFile.name);
+        var uploadTask = storageRef.put(photoFile);
+        uploadTask.on('state_changed',
+            function (snapshot) {
+                var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('Upload is ' + progress + '% complete');
+            },
+            function (error) {
+                console.error('Error uploading photo to Firebase:', error);
+            },
+            function () {
+                uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                    voterData.photoUrl = downloadURL;
+                    $.ajax({
+                        type: 'POST',
+                        url: '/VoterReg?handler=VoterReg',
+                        headers:
+                        {
+                            "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                        },
+                        contentType: 'application/json',
+                        data: JSON.stringify(voterData),
+                        success: function (result) {
+                            if (result.status == "01") {
+                                alert("Successfully registered");
+                                window.location.href = '/Login';
+                            }
+                            else{
+                                alert("Unable to register");
+                            }
+                        },
+                        error: function (error) {
+                            console.error(error);
+                        }
+                    });
+                });
+            }
+        );
+    }
+</script>
+</html>

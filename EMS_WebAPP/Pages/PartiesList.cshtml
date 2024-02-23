@@ -1,0 +1,115 @@
+﻿@page
+@model EMS_WebAPP.Pages.PartiesListModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party List</title>
+    <link href="~/css/common.css" rel="stylesheet" />
+    @Html.AntiForgeryToken()
+    <style>
+        .head-div{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div>
+        <div class="head-div">
+            <h2>Party List</h2>
+            <button type="button" onclick="AddParty()">Add new party</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Party Code</th>
+                    <th>Party Name</th>
+                    <th>Symbol</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var party in Model.Parties)
+                {
+                    <tr>
+                        <td>@party.partyCode</td>
+                        <td>@party.partyName</td>
+                        <td>@party.symbol</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div id="overlay" class="overlay"></div>
+    </div>
+    <div id="Popup" class="popup">
+        <h3>Add new party</h3>
+        <label for="partyCode">Party Code:</label>
+        <input type="text" id="partyCode" name="partyCode">
+        <br>
+        <label for="partyName">Party Name:</label>
+        <input type="text" id="partyName" name="partyName">
+        <br>
+        <label for="symbol">Symbol:</label>
+        <input type="text" id="symbol" name="symbol">
+        <br>
+        <button onclick="Save()">Save</button>
+        <button onclick="closePopup()">Cancel</button>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    function openPopup() {
+        $("#Popup").css("display", "block");
+        $("#overlay").css("display", "block");
+    }
+
+    function closePopup() {
+        $("#Popup").css("display", "none");
+        $("#overlay").css("display", "none");
+    }
+
+    function AddParty() {
+        openPopup();
+    }
+
+    function Save(){
+        var partyCode = $('#partyCode').val().toUpperCase();
+        var partyName = $('#partyName').val();
+        var symbol = $('#partyName').val();
+
+        var param = {
+            partyCode: partyCode,
+            partyName: partyName,
+            symbol: symbol
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '/PartiesList?handler=PartyReg',
+            headers:
+            {
+                "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+            },
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                if (data.status == "01") {
+                    alert('Party added successfully!');
+                    location.reload();
+                }
+                else {
+                    alert('unable to add now');
+                }
+            },
+            error: function (error) {
+                alert('Failed to add. Please try again.');
+            }
+        });
+    }
+
+</script>
+</html>
